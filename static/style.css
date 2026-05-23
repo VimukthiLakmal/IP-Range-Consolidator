@@ -1,0 +1,115 @@
+/* ===== GLOBAL ===== */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #e9f0ff, #f7f7f7);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ===== MAIN CARD ===== */
+.container {
+    width: 700px;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    position: relative;
+}
+
+/* ===== TITLE ===== */
+h1 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333;
+}
+
+/* ===== FORM CENTER FIX ===== */
+form {
+    display: flex;
+    justify-content: center;   /* KEY FIX */
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+/* FILE INPUT */
+input[type="file"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fafafa;
+}
+
+/* ===== BUTTONS ===== */
+button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+/* PROCESS BUTTON */
+button[type="submit"] {
+    background: #007bff;
+    color: white;
+}
+
+button[type="submit"]:hover {
+    background: #0056b3;
+}
+
+/* RESET BUTTON */
+.reset-btn {
+    background: #dc3545;
+    color: white;
+    margin-top: 10px;
+}
+
+.reset-btn:hover {
+    background: #a71d2a;
+}
+
+/* ===== STATUS TEXT ===== */
+#status {
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+/* ===== PROGRESS BAR ===== */
+.progress-container {
+    width: 100%;
+    background: #eee;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 15px;
+    height: 18px;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #007bff, #00c6ff);
+    transition: width 0.4s ease;
+}
+
+/* ===== DOWNLOAD AREA ===== */
+.download-box {
+    text-align: center;
+    margin-top: 15px;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+    position: absolute;
+    bottom: 10px;
+    width: 100%;
+    text-align: center;
+    font-size: 14px;
+    color: #777;
+}

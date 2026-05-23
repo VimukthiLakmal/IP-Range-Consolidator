@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IP Range Processor</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>IP Range Consolidator</h1>
+
+    <form id="uploadForm">
+
+        <!-- INPUT ROW -->
+        <div class="input-row">
+            <input type="file" id="fileInput" accept=".xlsx,.csv" required />
+            <button type="submit" class="btn-primary">Upload & Process</button>
+        </div>
+
+    </form>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <p id="statusText"></p>
+
+    <!-- RESET BUTTON (BELOW STATUS TEXT) -->
+    <button type="button" id="resetBtn" class="btn-reset">Reset</button>
+
+</div>
+
+<div class="footer">
+    Designed & Developed by Vimukthi Lakmal
+</div>
+
+<script>
+const fileInput = document.getElementById("fileInput");
+const progressBar = document.getElementById("progressBar");
+const statusText = document.getElementById("statusText");
+const resetBtn = document.getElementById("resetBtn");
+const form = document.getElementById("uploadForm");
+
+function resetUI() {
+    fileInput.value = "";
+    progressBar.style.width = "0%";
+    statusText.innerText = "";
+}
+
+// RESET
+resetBtn.addEventListener("click", resetUI);
+
+// UPLOAD
+form.addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const file = fileInput.files[0];
+    if (!file) {
+        statusText.innerText = "Please select a file.";
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/process", true);
+    xhr.responseType = "blob";
+
+    xhr.upload.onprogress = function(event) {
+        if (event.lengthComputable) {
+            let percent = (event.loaded / event.total) * 100;
+            progressBar.style.width = percent + "%";
+            statusText.innerText = "Uploading... " + Math.round(percent) + "%";
+        }
+    };
+
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+
+            const blob = xhr.response;
+            const link = document.createElement("a");
+            link.href = window.URL.createObjectURL(blob);
+            link.download = "processed_file.xlsx";
+            link.click();
+
+            progressBar.style.width = "100%";
+            statusText.innerText = "Download started!";
+
+        } else {
+            statusText.innerText = "Error processing file.";
+        }
+    };
+
+    xhr.send(formData);
+});
+</script>
+
+</body>
+</html>
