@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 import os
 import shutil
@@ -13,6 +14,15 @@ import pandas as pd
 
 app = FastAPI()
 
+# ---------------- CORS (IMPORTANT FOR NETLIFY) ---------------- #
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # later restrict to your Netlify URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # ---------------- DIRECTORIES ---------------- #
 UPLOAD_DIR = "uploads"
 OUTPUT_DIR = "outputs"
@@ -20,7 +30,7 @@ OUTPUT_DIR = "outputs"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# ---------------- STATIC ---------------- #
+# ---------------- STATIC FILES ---------------- #
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
@@ -46,24 +56,27 @@ def process_file(file_path: str):
 
 # ---------------- ROUTES ---------------- #
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 def home():
-    return FileResponse("templates/index.html")
+    with open("templates/index.html", "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
 
 
 @app.post("/process")
 async def process(file: UploadFile = File(...)):
 
-    # ---------------- VALIDATION ---------------- #
+    # ---------------- FILE VALIDATION ---------------- #
     if not (file.filename.endswith(".xlsx") or file.filename.endswith(".csv")):
         return JSONResponse(
             status_code=400,
             content={"error": "Only .xlsx or .csv files are allowed"}
         )
 
-    # ---------------- SAVE UPLOADED FILE ---------------- #
-    file_path = os.path.join(UPLOAD_DIR, file.filename)
+    # ---------------- SAFE FILE NAME ---------------- #
+    safe_filename = f"{datetime.now().timestamp()}_{file.filename}"
+    file_path = os.path.join(UPLOAD_DIR, safe_filename)
 
+    # ---------------- SAVE FILE ---------------- #
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
@@ -76,7 +89,7 @@ async def process(file: UploadFile = File(...)):
             content={"error": f"Processing failed: {str(e)}"}
         )
     finally:
-        # OPTIONAL CLEANUP (removes uploaded file after processing)
+        # cleanup uploaded file
         if os.path.exists(file_path):
             os.remove(file_path)
 
@@ -86,3 +99,11 @@ async def process(file: UploadFile = File(...)):
         filename=os.path.basename(output_file),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
+
+# ---------------- DEPLOYMENT ENTRY ---------------- #
+if __name__ == "__main__":
+    import uvicorn
+
+    port = int(os.environ.get("PORT", 8000))  # Railway/Cloud support
+    uvicorn.run(app, host="0.0.0.0", port=port)
